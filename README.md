@@ -70,8 +70,12 @@ Publish the generated `frontend/dist` directory on any static host. Configure
 this build-time environment variable:
 
 ```text
-VITE_API_BASE_URL=https://your-render-service.onrender.com/api
+VITE_API_BASE_URL=https://ai-knowledge-assistant-y5pw.onrender.com/api
 ```
+
+This value is also defined in `frontend/.env.production`, which Vite loads
+automatically for `npm run build`. Local `npm run dev` still uses
+`http://localhost:5000/api`.
 
 After the frontend is deployed, add its exact origin to the backend
 `CORS_ORIGINS` value in Render.
