@@ -10,16 +10,19 @@ async function analyzeFile(
 ){
 
     const deps =
-        analyzer.extractDependencies(
-            content
-        );
-
+    analyzer.extractDependencies(
+        content
+    );
+    console.log("DEPENDENCIES:", deps);
     for(const dep of deps){
 
         await repo.saveDependency(
+
             filePath,
-            dep,
-            "IMPORT"
+
+            dep.target,
+
+            dep.type
         );
     }
 

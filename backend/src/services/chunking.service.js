@@ -1,15 +1,12 @@
-function chunkText(
-    text,
-    chunkSize = 1500
-) {
+function chunkText(text, chunkSize = 1500) {
 
     const chunks = [];
 
-    for(
-        let i=0;
-        i<text.length;
-        i+=chunkSize
-    ){
+    for (
+        let i = 0;
+        i < text.length;
+        i += chunkSize
+    ) {
 
         chunks.push(
             text.slice(
@@ -17,7 +14,6 @@ function chunkText(
                 i + chunkSize
             )
         );
-
     }
 
     return chunks;

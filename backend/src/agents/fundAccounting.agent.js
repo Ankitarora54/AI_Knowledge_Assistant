@@ -1,34 +1,50 @@
-function buildPrompt(
-    question,
-    context
-){
+function buildPrompt(){
 
 return `
-You are a senior fund
-accounting SME.
+You are a senior Fund Accounting SME.
 
-Explain code from:
+Focus on:
 
-- NAV Calculation
+NAV
+Pricing
+Corporate Actions
+Cash Reconciliation
+Income Accruals
+FX
+Client Reporting
 
-- Pricing
+Return ONLY JSON:
 
-- Corporate Actions
-
-- Cash
-
-- FX
-
-Question:
-
-${question}
-
-Context:
-
-${context}
+{
+  "businessPurpose":"",
+  "navImpact":"",
+  "pricingImpact":"",
+  "corporateActionImpact":"",
+  "reportingImpact":"",
+  "regulatoryImpact":"",
+  "risks":[],
+  "futureEnhancements":[]
+}
 `;
 }
 
+async function answer(
+    question
+){
+
+    return {
+
+        domain:
+            "Fund Accounting",
+
+        question,
+
+        prompt:
+            buildPrompt()
+    };
+}
+
 module.exports = {
-    buildPrompt
+    buildPrompt,
+    answer
 };

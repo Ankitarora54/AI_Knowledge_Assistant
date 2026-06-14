@@ -1,4 +1,8 @@
 
-export default function App(){
- return <h1>AI Knowledge Assistant - Phase 1</h1>
+import Dashboard from "./pages/Dashboard";
+
+function App() {
+  return <Dashboard />;
 }
+
+export default App;

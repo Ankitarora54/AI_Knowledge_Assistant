@@ -4,18 +4,73 @@ function extractDependencies(code){
 
     const patterns = [
 
-        /import\s+.*?\s+from\s+['"](.*?)['"]/g,
+        // CommonJS
+        {
+            type: "require",
+            regex: /require\(['"](.+?)['"]\)/g
+        },
 
-        /require\(['"](.*?)['"]\)/g,
+        // ES6 imports
+        {
+            type: "import",
+            regex: /from\s+['"](.+?)['"]/g
+        },
 
-        /@Autowired\s+private\s+(\w+)/g,
+        // axios
+        {
+            type: "axios",
+            regex:
+            /axios\.(?:get|post|put|delete)\(['"](.+?)['"]\)/g
+        },
 
-        /new\s+(\w+Service)/g,
+        // fetch
+        {
+            type: "fetch",
+            regex:
+            /fetch\(['"](.+?)['"]\)/g
+        },
 
-        /fetch\(['"](.*?)['"]\)/g,
+        // Express routers
+        {
+            type: "express_router",
+            regex:
+            /require\(['"]\.\/routes\/(.+?)['"]\)/g
+        },
 
-        /axios\.(?:get|post|put|delete)\(['"](.*?)['"]\)/g
+        // Java imports
+        {
+            type: "java_import",
+            regex:
+            /import\s+([\w\.]+);/g
+        },
 
+        // Spring Autowired
+        {
+            type: "spring_autowired",
+            regex:
+            /@Autowired[\s\S]*?private\s+(\w+)/g
+        },
+
+        // Service Instantiation
+        {
+            type: "service_call",
+            regex:
+            /new\s+(\w+Service)/g
+        },
+
+        // RestTemplate
+        {
+            type: "rest_template",
+            regex:
+            /RestTemplate/g
+        },
+
+        // Feign Client
+        {
+            type: "feign_client",
+            regex:
+            /@FeignClient\s*\(\s*name\s*=\s*"([^"]+)"/g
+        }
     ];
 
     for(const pattern of patterns){
@@ -23,17 +78,22 @@ function extractDependencies(code){
         let match;
 
         while(
-            (match = pattern.exec(code))
+            (match = pattern.regex.exec(code))
             !== null
         ){
 
-            dependencies.push(
-                match[1]
-            );
+            dependencies.push({
+
+                type:
+                    pattern.type,
+
+                target:
+                    match[1] || "unknown"
+            });
         }
     }
 
-    return [...new Set(dependencies)];
+    return dependencies;
 }
 
 module.exports = {

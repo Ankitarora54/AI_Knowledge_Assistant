@@ -6,7 +6,8 @@ require("../repositories/embedding.repository");
 
 async function semanticSearch(
     query,
-    limit = 10
+    limit = 10,
+    filters = {}
 ){
 
     const embedding =
@@ -17,7 +18,8 @@ async function semanticSearch(
     const results =
         await embeddingRepo.findSimilar(
             embedding,
-            limit
+            limit,
+            filters
         );
 
     return results.map(
@@ -50,7 +52,8 @@ async function semanticSearch(
 async function semanticSearchByType(
     query,
     docType,
-    limit = 10
+    limit = 10,
+    filters = {}
 ){
 
     const embedding =
@@ -62,58 +65,192 @@ async function semanticSearchByType(
         await embeddingRepo.findSimilarByType(
             embedding,
             docType,
-            limit
+            limit,
+            filters
         );
 
     return results;
 }
 
 
+// async function semanticSearchGrouped(
+//     query
+// ){
+
+//     const embedding =
+//         await embeddingService
+//             .generateEmbedding(
+//                 query
+//             );
+
+//     return {
+
+//         code:
+//             await embeddingRepo
+//                 .findSimilarByTypeEmbedding(
+//                     embedding,
+//                     "github_code",
+//                     10
+//                 ),
+
+//         commits:
+//             await embeddingRepo
+//                 .findSimilarByTypeEmbedding(
+//                     embedding,
+//                     "github_commit",
+//                     10
+//                 ),
+
+//         prs:
+//             await embeddingRepo
+//                 .findSimilarByTypeEmbedding(
+//                     embedding,
+//                     "github_pr",
+//                     10
+//                 ),
+
+//         comments:
+//             await embeddingRepo
+//                 .findSimilarByTypeEmbedding(
+//                     embedding,
+//                     "github_comment",
+//                     10
+//                 ),
+
+//         jira:
+//             await embeddingRepo
+//                 .findSimilarByTypeEmbedding(
+//                     embedding,
+//                     "jira_story",
+//                     10
+//                 )
+                
+//     };
+//     console.log(
+//             "JIRA RESULTS"
+//         );
+
+//         jira.forEach(
+//             x =>
+//                 console.log(
+//                     x.metadata?.issue_key,
+//                     x.content?.substring(
+//                         0,
+//                         100
+//                     )
+//                 )
+//         );
+// }
+
 async function semanticSearchGrouped(
-    query
+    query,
+    filters = {}
 ){
 
     const embedding =
-        await embeddingService.generateEmbedding(
-            query
+        await embeddingService
+            .generateEmbedding(
+                query
+            );
+
+    const code =
+        await embeddingRepo
+            .findSimilarByTypeEmbedding(
+                embedding,
+                "github_code",
+                10,
+                filters
+            );
+
+    const commits =
+        await embeddingRepo
+            .findSimilarByTypeEmbedding(
+                embedding,
+                "github_commit",
+                10,
+                {
+                    repository:
+                        filters.repository
+                }
+            );
+
+    const prs =
+        await embeddingRepo
+            .findSimilarByTypeEmbedding(
+                embedding,
+                "github_pr",
+                10,
+                {
+                    repository:
+                        filters.repository
+                }
+            );
+
+    const comments =
+        await embeddingRepo
+            .findSimilarByTypeEmbedding(
+                embedding,
+                "github_comment",
+                10,
+                {
+                    repository:
+                        filters.repository
+                }
+            );
+
+    const jira =
+        await embeddingRepo
+            .findSimilarByTypeEmbedding(
+                embedding,
+                "jira_story",
+                10
+            );
+    
+    const confluence =
+    await embeddingRepo
+        .findSimilarByTypeEmbedding(
+            embedding,
+            "confluence",
+            10
+        );
+    
+    
+    const filteredJira =
+        jira.filter(
+        x => x.distance < 0.5
+        );
+    
+    const filteredConfluence =
+    confluence.filter(
+        x => x.distance < 0.6
+    );    
+
+    console.log(
+            "Confluence Chunks:",
+            filteredConfluence.length
         );
 
-    const results =
-        await embeddingRepo.findSimilar(
-            embedding,
-            20
+        filteredConfluence.forEach(
+            x =>
+                console.log(
+                    x.metadata?.page_id,
+                    x.distance
+                )
         );
 
     return {
 
-        code:
-            results.filter(
-                r =>
-                    r.doc_type ===
-                    "github_code"
-            ),
+        code,
 
-        commits:
-            results.filter(
-                r =>
-                    r.doc_type ===
-                    "github_commit"
-            ),
+        commits,
 
-        prs:
-            results.filter(
-                r =>
-                    r.doc_type ===
-                    "github_pr"
-            ),
+        prs,
 
-        comments:
-            results.filter(
-                r =>
-                    r.doc_type ===
-                    "github_comment"
-            )
+        comments,
 
+        jira: filteredJira,
+
+        confluence: filteredConfluence
     };
 }
 
@@ -121,26 +258,3 @@ async function semanticSearchGrouped(
 module.exports = {
     semanticSearch,semanticSearchByType,semanticSearchGrouped
 };
-
-// const embeddingService =
-// require("./embedding.service");
-
-// const embeddingRepo =
-// require("../repositories/embedding.repository");
-
-// async function semanticSearch(query){
-
-//   const embedding =
-//     await embeddingService.generateEmbedding(
-//       query
-//     );
-
-//   return await embeddingRepo.findSimilar(
-//     embedding,
-//     10
-//   );
-// }
-
-// module.exports = {
-//   semanticSearch
-// };

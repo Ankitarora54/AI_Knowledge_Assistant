@@ -36,6 +36,25 @@ async function createDocument(
     return result.rows[0];
 }
 
+async function findByTitle(
+    title
+){
+
+    const result =
+        await pool.query(
+`
+SELECT *
+FROM documents
+WHERE title = $1
+LIMIT 1
+`,
+[title]
+);
+
+    return result.rows[0];
+}
+
 module.exports = {
-    createDocument
+    createDocument,
+    findByTitle
 };

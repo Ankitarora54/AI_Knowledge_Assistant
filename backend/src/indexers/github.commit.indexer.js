@@ -26,15 +26,38 @@ async function indexCommits(
     for(const commit of commits){
 
         const text = `
-Commit Hash:
-${commit.sha}
+                        Repository:
+                        ${repo}
 
-Author:
-${commit.commit.author.name}
+                        Commit Hash:
+                        ${commit.sha}
 
-Message:
-${commit.commit.message}
-`;
+                        Author:
+                        ${commit.commit.author.name}
+
+                        Commit Date:
+                        ${commit.commit.author.date}
+
+                        Message:
+                        ${commit.commit.message}
+
+                        `;
+
+    const existing =
+        await documentRepo
+            .findByTitle(
+                commit.sha
+            );
+
+    if(existing){
+
+        console.log(
+            "Commit already indexed:",
+            commit.sha
+        );
+
+        continue;
+    }
 
         const document =
             await documentRepo.createDocument(
@@ -43,10 +66,19 @@ ${commit.commit.message}
                 "github_commit",
                 {
                     repository: repo,
-                    commit_hash: commit.sha,
+
+                    commit_hash:
+                        commit.sha,
+
+                    commit_message:
+                        commit.commit.message,
+
                     author:
-                        commit.commit.author.name
-                }
+                        commit.commit.author.name,
+
+                    commit_date:
+                        commit.commit.author.date
+                    }
             );
 
         const embedding =
@@ -60,7 +92,18 @@ ${commit.commit.message}
             "github_commit",
             {
                 repository: repo,
-                commit_hash: commit.sha
+
+                commit_hash:
+                    commit.sha,
+
+                commit_message:
+                    commit.commit.message,
+
+                author:
+                    commit.commit.author.name,
+
+                commit_date:
+                    commit.commit.author.date
             },
             document.id
         );
@@ -75,85 +118,3 @@ module.exports = {
     indexCommits
 };
 
-// const githubService =
-//     require("../services/github.service");
-
-// const documentRepo =
-//     require("../repositories/document.repository");
-
-// const embeddingRepo =
-//     require("../repositories/embedding.repository");
-
-// const embeddingService =
-//     require("../services/embedding.service");
-
-// async function indexCommits(
-//     owner,
-//     repo
-// ) {
-
-//     const commits =
-//         await githubService.getCommits(
-//             owner,
-//             repo
-//         );
-
-//     let count = 0;
-
-//     for(const commit of commits){
-
-//         const text = `
-//             Commit: ${commit.sha}
-
-//             Author:
-//             ${commit.commit.author.name}
-
-//             Message:
-//             ${commit.commit.message}
-//         `;
-
-//         const document =
-//             await documentRepo.createDocument(
-
-//                 commit.sha,
-
-//                 text,
-
-//                 "github_commit",
-
-//                 {
-//                     repository: repo,
-//                     commit_hash: commit.sha
-//                 }
-//             );
-
-//         const embedding =
-//             await embeddingService.generateEmbedding(
-//                 text
-//             );
-
-//         await embeddingRepo.saveEmbedding(
-
-//             text,
-
-//             embedding,
-
-//             "github_commit",
-
-//             {
-//                 repository: repo,
-//                 commit_hash: commit.sha
-//             },
-
-//             document.id
-//         );
-
-//         count++;
-//     }
-
-//     return count;
-// }
-
-// module.exports = {
-//     indexCommits
-// };
